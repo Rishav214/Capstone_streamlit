@@ -6,21 +6,110 @@ import plotly.express as px
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.decomposition import PCA
-# Ignore warnings
 import warnings
+
+# Ignore warnings
 warnings.filterwarnings('ignore')
 
 # Set page title and layout
 st.set_page_config(page_title="Customer Segmentation Analysis", layout="wide")
 
+# Custom CSS for styling and animation
+st.markdown("""
+<style>
+body {
+    color: #fff;
+    background-color: #4f8bf9;
+    font-family: 'Arial', sans-serif;
+    animation: bodyFadeIn 2s ease;
+}
+
+header {
+    text-align: center;
+    padding: 20px;
+    background-color: #4f8bf9;
+    animation: headerFadeIn 2s ease;
+}
+
+#sidebar {
+    padding: 20px;
+    background-color: #4f8bf9;
+    animation: sidebarFadeIn 2s ease;
+}
+
+main {
+    padding: 20px;
+    animation: mainFadeInUp 2s ease;
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #4f8bf9;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    font-size: 12px;
+    animation: footerFadeIn 2s ease;
+}
+
+@keyframes bodyFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes headerFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes sidebarFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes mainFadeInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes footerFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+</style>
+""", unsafe_allow_html=True)
+
 # Header
-st.header("Customer Segmentation Analysis")
+st.markdown("<header><h1>Customer Segmentation Analysis</h1></header>", unsafe_allow_html=True)
 
 # Load data
-@st.cache_resource()
+@st.cache_resource()  # Use @st.cache() decorator for caching
 def load_data():
     df = pd.read_csv('https://raw.githubusercontent.com/sgx-saksham/Predictive-Analysis-streamlit/main/Banking_Customer_Data.csv')
-    return df.copy()  # Return a copy of the DataFrame to avoid mutation issues
+    return df.copy()
 
 df = load_data()
 
@@ -39,7 +128,7 @@ num_cols = ['Age', 'AvgTransactionAmount', 'TransactionFrequency', 'SpendingOnGr
 df[num_cols] = scaler.fit_transform(df[num_cols])
 
 # Sidebar
-st.sidebar.title("Options")
+st.sidebar.markdown("<div id='sidebar'><h2>Options</h2></div>", unsafe_allow_html=True)
 trend = st.sidebar.selectbox('Select a trend', ['Marketing', 'Sales', 'Age', 'Investment', 'Spending'])
 if trend == 'Marketing':
     selected_features = ['AvgTransactionAmount', 'TransactionFrequency', 'Age', 'Gender']  
@@ -53,12 +142,12 @@ elif trend == 'Spending':
     selected_features = ['SpendingOnGroceries', 'SpendingOnEntertainment', 'SpendingOnTravel', 'AvgTransactionAmount']
 
 # Display selected variables
-st.sidebar.markdown(f"**Selected Variables for Trend '{trend}':** {', '.join(selected_features)}")
+st.sidebar.markdown(f"<h3>Selected Variables for Trend '{trend}':</h3>{', '.join(selected_features)}", unsafe_allow_html=True)
 
 # Initial data insights
-st.write("### Initial Data Insights:")
-st.write("Explore some initial insights from the dataset here, such as summary statistics or a few sample rows:")
-st.write(df.describe())  # You can customize this based on the insights you want to show
+st.markdown("<main><h2>Initial Data Insights:</h2></main>", unsafe_allow_html=True)
+st.markdown("<main>Explore some initial insights from the dataset here, such as summary statistics or a few sample rows:</main>", unsafe_allow_html=True)
+st.write(df.describe())
 
 # Button for training the dataset
 if st.sidebar.button('Train the dataset'):
@@ -77,17 +166,16 @@ if st.sidebar.button('View visualization'):
         # 3D Scatter plot with Plotly
         fig = px.scatter_3d(df, x='PC1', y='PC2', z='PC3', color='Cluster', title='Customer Segments',
                             labels={'PC1': selected_features[0], 'PC2': selected_features[1], 'PC3': selected_features[2]},
-                            opacity=0.8, size_max=10, color_continuous_scale='viridis')
+                            opacity=0.8, size_max=10, color_continuous_scale='Rainbow', animation_frame='Cluster')
         st.plotly_chart(fig)
 
         # Inference
-        st.markdown("**Inference:**")
-        st.markdown(f"The 3D visualization displays customer segments based on the selected trend '**{trend}**'.")
-        st.markdown(f"Each cluster represents a group of customers with similar characteristics in terms of {', '.join(selected_features)}.")
-        st.markdown("This information can be used to tailor marketing strategies, improve sales, and understand customer behavior.")
+        st.markdown("<main><h2>Inference:</h2></main>", unsafe_allow_html=True)
+        st.markdown(f"<main>The 3D visualization displays customer segments based on the selected trend '<strong>{trend}</strong>'.</main>", unsafe_allow_html=True)
+        st.markdown(f"<main>Each cluster represents a group of customers with similar characteristics in terms of {', '.join(selected_features)}.</main>", unsafe_allow_html=True)
+        st.markdown("<main>This information can be used to tailor marketing strategies, improve sales, and understand customer behavior.</main>", unsafe_allow_html=True)
     else:
         st.sidebar.error('Please train the dataset first.')
 
 # Footer
-st.sidebar.markdown("---")
-st.sidebar.markdown("Developed by Rishav")
+st.sidebar.markdown("<footer><hr><p style='font-size: 12px;'>Developed by Team 10</p></footer>", unsafe_allow_html=True)
