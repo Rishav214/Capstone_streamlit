@@ -108,7 +108,7 @@ st.markdown("<header><h1>Customer Segmentation Analysis</h1></header>", unsafe_a
 # Load data
 @st.cache_resource()  # Use @st.cache() decorator for caching
 def load_data():
-    df = pd.read_csv('https://raw.githubusercontent.com/sgx-saksham/Predictive-Analysis-streamlit/main/Banking_Customer_Data.csv')
+    df = pd.read_csv('https://raw.githubusercontent.com/Rishav214/K-Means-Finance/main/data.csv')
     return df.copy()
 
 df = load_data()
@@ -128,8 +128,39 @@ num_cols = ['Age', 'AvgTransactionAmount', 'TransactionFrequency', 'SpendingOnGr
 df[num_cols] = scaler.fit_transform(df[num_cols])
 
 # Sidebar
+# st.sidebar.markdown("<div id='sidebar'><h2>Options</h2></div>", unsafe_allow_html=True)
+# trend = st.sidebar.selectbox('Select a trend', ['Marketing', 'Sales', 'Age', 'Investment', 'Spending'])
+# if trend == 'Marketing':
+#     selected_features = ['AvgTransactionAmount', 'TransactionFrequency', 'Age', 'Gender']  
+# elif trend == 'Sales':
+#     selected_features = ['SpendingOnGroceries', 'SpendingOnEntertainment', 'SpendingOnTravel']
+# elif trend == 'Age':
+#     selected_features = ['Age', 'TotalIncome', 'CreditScore'] 
+# elif trend == 'Investment':
+#     selected_features = ['IncomeInvested', 'PreferredInvestmentType', 'InvestmentDuration', 'RiskTolerance'] 
+# elif trend == 'Spending':
+#     selected_features = ['SpendingOnGroceries', 'SpendingOnEntertainment', 'SpendingOnTravel', 'AvgTransactionAmount']
+
+# # Display selected variables
+# st.sidebar.markdown(f"<h3>Selected Variables for Trend '{trend}':</h3>{', '.join(selected_features)}", unsafe_allow_html=True)
+
+# Sidebar
 st.sidebar.markdown("<div id='sidebar'><h2>Options</h2></div>", unsafe_allow_html=True)
-trend = st.sidebar.selectbox('Select a trend', ['Marketing', 'Sales', 'Age', 'Investment', 'Spending'])
+
+# Add a selectbox for the tier
+tier = st.sidebar.selectbox('Select a tier', ['Diamond', 'Platinum', 'Gold', 'Silver'])
+
+# Display different options based on the selected tier
+if tier == 'Diamond':
+    trend = st.sidebar.selectbox('Select a trend', ['Marketing', 'Sales', 'Age', 'Investment', 'Spending'])
+elif tier == 'Platinum':
+    trend = st.sidebar.selectbox('Select a trend', ['Marketing', 'Sales', 'Age'])
+elif tier == 'Gold':
+    trend = st.sidebar.selectbox('Select a trend', ['Marketing', 'Sales'])
+elif tier == 'Silver':
+    trend = st.sidebar.selectbox('Select a trend', ['Marketing'])
+
+# Determine the selected features based on the selected trend
 if trend == 'Marketing':
     selected_features = ['AvgTransactionAmount', 'TransactionFrequency', 'Age', 'Gender']  
 elif trend == 'Sales':
@@ -152,7 +183,7 @@ st.write(df.describe())
 # Button for training the dataset
 if st.sidebar.button('Train the dataset'):
     # KMeans clustering
-    kmeans = KMeans(n_clusters=5, random_state=42)
+    kmeans = KMeans(n_clusters=4, random_state=42)
     df['Cluster'] = kmeans.fit_predict(df[selected_features])
     st.session_state['trained'] = True  # Set the 'trained' state to True
 
@@ -174,6 +205,21 @@ if st.sidebar.button('View visualization'):
         st.markdown(f"<main>The 3D visualization displays customer segments based on the selected trend '<strong>{trend}</strong>'.</main>", unsafe_allow_html=True)
         st.markdown(f"<main>Each cluster represents a group of customers with similar characteristics in terms of {', '.join(selected_features)}.</main>", unsafe_allow_html=True)
         st.markdown("<main>This information can be used to tailor marketing strategies, improve sales, and understand customer behavior.</main>", unsafe_allow_html=True)
+
+        # Business Insights based on Clusters
+        st.markdown("<main><h2>Business Insights:</h2></main>", unsafe_allow_html=True)
+
+        # Inference for Clusters
+        st.markdown("<main><h3>Cluster Insights:</h3></main>", unsafe_allow_html=True)
+        for cluster_num in range(4):
+            st.markdown(f"<main><h4>Cluster {cluster_num}:</h4></main>", unsafe_allow_html=True)
+            
+            # Calculate the mean or mode of the features in the cluster
+            cluster_data = df[df['Cluster'] == cluster_num]
+            cluster_insights = cluster_data[selected_features].mean()  # or .mode()
+
+            # Display the insights in a table
+            st.table(cluster_insights.to_frame('Mean Value'))
     else:
         st.sidebar.error('Please train the dataset first.')
 
