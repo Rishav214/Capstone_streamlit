@@ -175,7 +175,7 @@ fig.update_layout(height=600, width=800)
 st.plotly_chart(fig)
 
 # Button for training the dataset
-if st.sidebar.button('Train the dataset'):
+if st.sidebar.button('Form Clusters'):
     # KMeans clustering
     kmeans = KMeans(n_clusters=4, random_state=42)
     df['Cluster'] = kmeans.fit_predict(df[selected_features])
@@ -185,7 +185,7 @@ if st.sidebar.button('Train the dataset'):
     st.session_state['centroids'] = kmeans.cluster_centers_
 
 # Display the visualization using Plotly
-if st.sidebar.button('View visualization'):
+if st.sidebar.button('Show Results'):
     if 'trained' in st.session_state and st.session_state['trained']:
         # PCA
         pca = PCA(n_components=3)  # Use 3 components for 3D plot
